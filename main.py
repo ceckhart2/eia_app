@@ -19,46 +19,57 @@ class MasterTK:
     def __init__(self):
 
         self.master = tk.Tk()
-
         self.canvas = None
         label_main = tk.Label(self.master, text='Carbon Emissions in the USA', font=('Arial', 25))
 
 
         #Creating frames
-        self.frame_plot = tk.Frame(self.master)
-
-        #Plot Frame contents
-        label_year = tk.Label(self.frame_plot, text='Year')
-        label_sector = tk.Label(self.frame_plot, text='Sector')
+        self.frame1 = tk.Frame(self.master)
+        self.frame2 = None
+        #Creating frame contents
+        self.label_state = tk.Label(self.frame1, text='State')
+        label_year = tk.Label(self.frame1, text='Year')
+        label_sector = tk.Label(self.frame1, text='Sector')
 
         self.strvar_year = tk.StringVar()
         self.strvar_sector = tk.StringVar()
+        self.strvar_state = tk.StringVar()
 
         years = [str(i) for i in range(1980,2020)]
         sectors = ["Residential", "Commercial", "Industrial", "Electric", "Transportation", "All"]
+        states = ['AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
+           'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
+           'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
+           'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX',
+           'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY']
 
-        option_year = tk.OptionMenu(self.frame_plot, self.strvar_year, *years)
-        option_sector = tk.OptionMenu(self.frame_plot, self.strvar_sector, *sectors)
 
-        button_data = tk.Button(self.frame_plot, text='Retrieve Data', command=self.plot_data)
+        option_year = tk.OptionMenu(self.frame1, self.strvar_year, *years)
+        option_sector = tk.OptionMenu(self.frame1, self.strvar_sector, *sectors)
+        option_state = tk.OptionMenu(self.frame1, self.strvar_state, *states)
+
+
+        button_retrieve = tk.Button(self.frame1, text='Retrieve Data', command=self.plot_data)
 
         #packing items to plot frame
-        label_year.grid(column=0, row=0, padx=5, pady=5)
-        label_sector.grid(column=1, row=0, padx=5, pady=5)
+        self.label_state.grid(column=0, row=0, padx=5, pady=5)
+        label_year.grid(column=1, row=0, padx=5, pady=5)
+        label_sector.grid(column=2, row=0, padx=5, pady=5)
 
-        option_year.grid(column=0, row=1, padx=5,)
-        option_sector.grid(column=1, row=1, padx=5,)
+        option_state.grid(column=0, row=1, padx=5)
+        option_year.grid(column=1, row=1, padx=5,)
+        option_sector.grid(column=2, row=1, padx=5,)
 
-        button_data.grid(column=3, row=1, padx=5)
+        button_retrieve.grid(column=3, row=1, padx=5)
 
         #Packing frames to main
         label_main.pack(side='top', pady = 5)
-        self.frame_plot.pack(side='top', pady=5)
+        self.frame1.pack(side='top', pady=5)
         self.master.mainloop()
 
     def plot_data(self):
         #Creates Search Query
-        state = 'CO'
+        state = self.strvar_state.get()
         year = self.strvar_year.get()
         api_key = 'tsK21n7UIzROgvie9e4Gd38vcubcSUsJeWjxHOWQ'
         base_url = 'https://api.eia.gov/v2/co2-emissions/co2-emissions-aggregates/data/?'
@@ -69,21 +80,21 @@ class MasterTK:
         d1 = Data(url)
         data_dict = getattr(d1, self.strvar_sector.get().lower())
 
-        fig = plt.figure(figsize=(5,4.5) , dpi=101)
+        fig = plt.figure(figsize=(5,5) , dpi=100)
         values = [value for key, value in data_dict.items() if key !="All Fuels"]
         plot = plt.pie([value for key, value in data_dict.items() if key !="All Fuels"], shadow=True,
                        labels =[round(value, 3) for key, value in data_dict.items() if key !="All Fuels"] )
-        plt.title(f"{state} {self.strvar_sector.get()} C02 Emissions in {year} (Metric Tons)")
-        plt.legend(['Petroleum', 'Natural Gas', "Coal"],loc='upper left')
+        plt.title(f"{state} {self.strvar_sector.get()} C02 Emissions - {year} (Metric Tons)")
+        plt.figlegend(['Petroleum', 'Natural Gas', "Coal"],loc='lower right')
 
         try:
             self.canvas.get_tk_widget().destroy()
         except AttributeError:
             pass
 
-        self.canvas = FigureCanvasTkAgg(master=self.frame_plot, figure=fig)
+        self.canvas = FigureCanvasTkAgg(master=self.frame1, figure=fig)
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(rowspan=5, columnspan=5, pady=10)
+        self.canvas.get_tk_widget().grid(rowspan=5, columnspan=5, pady=5)
 
 
 class Data:
