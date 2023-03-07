@@ -19,28 +19,13 @@ class MasterTK:
     def __init__(self):
 
         self.master = tk.Tk()
-        self.master.geometry('1200x600')
-
-        self.master.bind('<Return>', self.set_map)
 
         self.canvas = None
         label_main = tk.Label(self.master, text='Carbon Emissions in the USA', font=('Arial', 25))
 
 
         #Creating frames
-        frame_map = tk.Frame(self.master)
         self.frame_plot = tk.Frame(self.master)
-
-        #Map Frame contents
-        label_location = tk.Label(frame_map, text='Enter or choose a state within the United States')
-        self.strvar_entry = tk.StringVar()
-        entry_location = tk.Entry(frame_map, textvariable=self.strvar_entry)
-
-
-
-        self.map_widget = tkintermapview.TkinterMapView(frame_map, width=600, height=450)
-        self.map_widget.set_address('Colorado')
-        self.map_widget.add_left_click_map_command(self.add_marker_event)
 
         #Plot Frame contents
         label_year = tk.Label(self.frame_plot, text='Year')
@@ -57,12 +42,6 @@ class MasterTK:
 
         button_data = tk.Button(self.frame_plot, text='Retrieve Data', command=self.plot_data)
 
-
-        #Packing items to map frame
-        label_location.pack()
-        entry_location.pack()
-        self.map_widget.pack(side='left', padx=5)
-
         #packing items to plot frame
         label_year.grid(column=0, row=0, padx=5, pady=5)
         label_sector.grid(column=1, row=0, padx=5, pady=5)
@@ -74,7 +53,6 @@ class MasterTK:
 
         #Packing frames to main
         label_main.pack(side='top', pady = 5)
-        frame_map.pack(side='left', pady=5)
         self.frame_plot.pack(side='top', pady=5)
         self.master.mainloop()
 
@@ -106,32 +84,6 @@ class MasterTK:
         self.canvas = FigureCanvasTkAgg(master=self.frame_plot, figure=fig)
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(rowspan=5, columnspan=5, pady=10)
-
-
-    def set_map(self, call):
-        location = self.strvar_entry.get()
-        self.marker_1 = self.map_widget.set_address(location, marker=True)
-
-    def add_marker_event(self, coords):
-        self.map_widget.delete_all_marker()
-
-        location = tkintermapview.convert_coordinates_to_address(coords[0], coords[1])[0]
-        marker = self.map_widget.set_marker(coords[0], coords[1])
-        marker.set_text(location)
-        self.strvar_entry.set(location.state)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class Data:
